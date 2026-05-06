@@ -70,11 +70,46 @@ function hasNameToken(text, term) {
 }
 
 function createWrapMaterial(wrap) {
-  if (wrap?.gradient) {
+  if (wrap?.laser) {
     return new THREE.ShaderMaterial({
       uniforms: {
-        colorA: { value: new THREE.Color("#7c3aed") },
-        colorB: { value: new THREE.Color("#06b6d4") },
+        colorA: { value: new THREE.Color("#ff2bd6") },
+        colorB: { value: new THREE.Color("#00e5ff") },
+        colorC: { value: new THREE.Color("#f5ff5a") },
+      },
+      vertexShader: `
+        varying vec3 vNormal;
+        varying vec3 vPosition;
+        void main() {
+          vNormal = normalize(normalMatrix * normal);
+          vPosition = position;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform vec3 colorA;
+        uniform vec3 colorB;
+        uniform vec3 colorC;
+        varying vec3 vNormal;
+        varying vec3 vPosition;
+        void main() {
+          float band = sin((vNormal.x + vNormal.y + vPosition.z * 0.015) * 8.0) * 0.5 + 0.5;
+          vec3 firstMix = mix(colorA, colorB, smoothstep(0.0, 0.75, band));
+          vec3 laser = mix(firstMix, colorC, smoothstep(0.72, 1.0, band));
+          float fresnel = pow(1.0 - abs(vNormal.z), 2.0);
+          gl_FragColor = vec4(laser + fresnel * 0.22, 1.0);
+        }
+      `,
+    });
+  }
+
+  if (wrap?.gradient) {
+    const [startColor = "#7c3aed", endColor = "#06b6d4"] = wrap.colors || [];
+
+    return new THREE.ShaderMaterial({
+      uniforms: {
+        colorA: { value: new THREE.Color(startColor) },
+        colorB: { value: new THREE.Color(endColor) },
       },
       vertexShader: `
         varying vec3 vNormal;

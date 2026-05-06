@@ -19,6 +19,18 @@ const carModels = [
     desc: "Fully Electric Crossover",
     path: "/models/volvo-ex30.glb",
   },
+  {
+    id: "porsche-911",
+    name: "Porsche 911",
+    desc: "Sports Coupe Preview",
+    path: "/models/porsche-911.glb",
+  },
+  {
+    id: "range-rover",
+    name: "Range Rover",
+    desc: "Luxury SUV Preview",
+    path: "/models/range-rover.glb",
+  },
 ];
 
 const wrapColors = [
@@ -73,9 +85,31 @@ const wrapColors = [
   },
   {
     id: "gradient",
-    label: "Gradient",
+    label: "Gradient Shift",
     color: "linear-gradient(135deg, #7c3aed, #06b6d4)",
     gradient: true,
+    colors: ["#7c3aed", "#06b6d4"],
+  },
+  {
+    id: "sunset-gradient",
+    label: "Sunset Gradient",
+    color: "linear-gradient(135deg, #f97316, #ec4899, #7c3aed)",
+    gradient: true,
+    colors: ["#f97316", "#ec4899"],
+  },
+  {
+    id: "laser",
+    label: "Laser Chrome",
+    color:
+      "linear-gradient(135deg, #ff2bd6 0%, #7c3aed 24%, #00e5ff 48%, #b6ff00 72%, #fff 100%)",
+    laser: true,
+  },
+  {
+    id: "aqua-laser",
+    label: "Aqua Laser",
+    color:
+      "linear-gradient(135deg, #00f5d4 0%, #00bbf9 32%, #9b5de5 64%, #fee440 100%)",
+    laser: true,
   },
 ];
 

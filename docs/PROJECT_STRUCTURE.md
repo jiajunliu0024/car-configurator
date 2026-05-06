@@ -1,6 +1,6 @@
 # Project Structure
 
-This project is a React + Vite 3D car wrap showroom. The page presents a white showroom-style interface with a fixed 3D car viewer, top model selector, and left-side wrap color selector.
+This project is a React + Vite 3D car wrap showroom. The page presents a white showroom-style interface with a fixed 3D car viewer, top model dropdown, and left-side wrap color drawer.
 
 ## High-Level Flow
 
@@ -53,15 +53,16 @@ Small app shell. It renders only `CarViewer`, keeping page-level logic out of th
 
 Main showroom component.
 
-- Renders the top car model selector.
-- Renders the left wrap color selector.
+- Renders the top car model dropdown so more vehicle models can be added without crowding the header.
+- Renders the left pull-out wrap drawer so more colors/materials can be added without crowding the viewport.
 - Tracks the currently selected car model.
 - Tracks wrap color per car model so each model can keep its own selected wrap.
 - Checks whether the selected GLB file exists.
 - Rejects HTML fallback responses so missing model paths do not crash `useGLTF`.
 - Renders the React Three Fiber `<Canvas>`.
 - Uses showroom lighting, `Environment`, `ContactShadows`, and `OrbitControls`.
-- Disables pan and zoom so the model stays visually fixed while still allowing rotation.
+- Uses `OrbitControls` with `makeDefault`, a fixed `target`, damping, bounded zoom distance, and explicit mouse/touch mappings for rotate + zoom.
+- Disables pan so the model stays centered, while allowing bounded zoom for closer inspection and explicit mouse/touch rotation controls. The viewer CSS uses `touch-action: none`, non-interactive overlays use `pointer-events: none`, and dropdown/drawer containers only enable pointer events on their actual controls so display layers do not steal rotation drags.
 - Shows the placeholder car when the GLB file is missing.
 
 ### `src/components/models/CarModel.jsx`
@@ -75,8 +76,9 @@ Main showroom component.
 - Skips non-wrap parts such as wheels, tires, glass, lights, interior, grille, chrome, badges, and plates using token-based matching so names like `primary` are not accidentally excluded by the `rim` token.
 - If no named body mesh exists, applies material to all wrap candidates so split body panels change together.
 - If that fails, applies material to all meshes.
-- Creates high-quality wrap materials with `MeshPhysicalMaterial`.
-- Creates the gradient wrap with a simple `ShaderMaterial`.
+- Creates high-quality solid wrap materials with `MeshPhysicalMaterial`.
+- Creates gradient wraps with a simple normal-based `ShaderMaterial`.
+- Creates laser/chrome-style wraps with a banded `ShaderMaterial` for iridescent color-shift effects.
 - Exports `PlaceholderCar` for preview mode when real GLB files are absent.
 
 ### `src/components/LoadingFallback.jsx`
@@ -88,7 +90,7 @@ Small loading indicator rendered inside the 3D canvas while a GLB is loading.
 Static showroom configuration.
 
 - `carModels`: model id, display name, description, and GLB path.
-- `wrapColors`: wrap id, label, swatch color, and material tuning values.
+- `wrapColors`: wrap id, label, swatch color, material tuning values, and special material flags such as `gradient` or `laser`.
 
 The default configured model imports `src/components/models/tesla_2018_model_3.glb` as a Vite asset URL. Update this file when adding new car models or wrap options.
 
@@ -97,12 +99,12 @@ The default configured model imports `src/components/models/tesla_2018_model_3.g
 Global CSS and showroom styling.
 
 - White showroom background.
-- Top centered model tabs.
-- Left fixed color sidebar.
+- Top centered model dropdown.
+- Left pull-out wrap drawer with a scrollable color/material grid.
 - Fixed-size central viewer.
 - Bottom detail cards.
 - Responsive layout for smaller screens.
-- On phone widths, model tabs become a compact horizontal top scroller, wrap colors move into a bottom touch-friendly swatch rail, the viewer is centered in the available middle area, and detail cards become compact.
+- On phone widths, the model dropdown becomes full-width at the top, the wrap drawer remains touch-friendly from the left edge, the viewer is centered in the available middle area, and detail cards become compact.
 
 ### `public/models/`
 
@@ -125,6 +127,8 @@ Additional configured paths:
 ```txt
 public/models/byd-seal.glb
 public/models/volvo-ex30.glb
+public/models/porsche-911.glb
+public/models/range-rover.glb
 ```
 
 If a configured file does not exist, the app uses the placeholder 3D car instead of crashing.

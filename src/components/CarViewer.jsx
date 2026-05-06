@@ -1,6 +1,7 @@
 import { ContactShadows, Environment, OrbitControls } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { Suspense, useEffect, useMemo, useState } from "react";
+import * as THREE from "three";
 import { carModels, wrapColors } from "../assets/data";
 import LoadingFallback from "./LoadingFallback";
 import CarModel, { PlaceholderCar } from "./models/CarModel";
@@ -11,6 +12,8 @@ export default function CarViewer() {
     Object.fromEntries(carModels.map((model) => [model.id, wrapColors[0].id])),
   );
   const [availableModels, setAvailableModels] = useState({});
+  const [isModelMenuOpen, setIsModelMenuOpen] = useState(false);
+  const [isWrapDrawerOpen, setIsWrapDrawerOpen] = useState(false);
 
   const selectedModel = useMemo(
     () => carModels.find((model) => model.id === selectedModelId) || carModels[0],
@@ -58,42 +61,102 @@ export default function CarViewer() {
       ...current,
       [selectedModelId]: wrapId,
     }));
+    setIsWrapDrawerOpen(false);
+  };
+
+  const selectModel = (modelId) => {
+    setSelectedModelId(modelId);
+    setIsModelMenuOpen(false);
   };
 
   return (
     <main className="showroom">
-      <nav className="model-tabs" aria-label="Choose car model">
-        {carModels.map((model) => (
-          <button
-            key={model.id}
-            type="button"
-            onClick={() => setSelectedModelId(model.id)}
-            className={model.id === selectedModelId ? "active" : ""}
-          >
-            {model.name}
-          </button>
-        ))}
+      <nav className="model-dropdown" aria-label="Choose car model">
+        <button
+          type="button"
+          className="model-trigger"
+          onClick={() => setIsModelMenuOpen((isOpen) => !isOpen)}
+          aria-expanded={isModelMenuOpen}
+        >
+          <span>
+            <small>Model</small>
+            {selectedModel.name}
+          </span>
+          <b>⌄</b>
+        </button>
+
+        <div className={`model-menu ${isModelMenuOpen ? "open" : ""}`}>
+          {carModels.map((model) => (
+            <button
+              key={model.id}
+              type="button"
+              onClick={() => selectModel(model.id)}
+              className={model.id === selectedModelId ? "active" : ""}
+            >
+              <span>{model.name}</span>
+              <small>{model.desc}</small>
+            </button>
+          ))}
+        </div>
       </nav>
 
-      <aside className="color-sidebar" aria-label="Choose wrap color">
-        <div className="sidebar-icon">Q</div>
-        {wrapColors.map((wrap) => (
-          <button
-            key={wrap.id}
-            type="button"
-            aria-label={wrap.label}
-            title={wrap.label}
-            onClick={() => selectWrap(wrap.id)}
-            className={wrap.id === selectedWrap.id ? "active" : ""}
-          >
-            <span
-              style={{
-                background: wrap.color,
-              }}
-            />
-          </button>
-        ))}
+      <aside
+        className={`wrap-drawer ${isWrapDrawerOpen ? "open" : ""}`}
+        aria-label="Choose wrap color"
+      >
+        <button
+          type="button"
+          className="wrap-trigger"
+          onClick={() => setIsWrapDrawerOpen((isOpen) => !isOpen)}
+          aria-expanded={isWrapDrawerOpen}
+        >
+          <span
+            style={{
+              background: selectedWrap.color,
+            }}
+          />
+          <b>{isWrapDrawerOpen ? "Close" : "Wraps"}</b>
+        </button>
+
+        <div className="wrap-panel">
+          <div className="wrap-panel-header">
+            <span>Wrap Color</span>
+            <strong>{selectedWrap.label}</strong>
+          </div>
+
+          <div className="wrap-options">
+            {wrapColors.map((wrap) => (
+              <button
+                key={wrap.id}
+                type="button"
+                aria-label={wrap.label}
+                title={wrap.label}
+                onClick={() => selectWrap(wrap.id)}
+                className={wrap.id === selectedWrap.id ? "active" : ""}
+              >
+                <span
+                  style={{
+                    background: wrap.color,
+                  }}
+                />
+                <small>{wrap.label}</small>
+              </button>
+            ))}
+          </div>
+        </div>
       </aside>
+
+      {(isModelMenuOpen || isWrapDrawerOpen) && (
+        <button
+          type="button"
+          className="menu-scrim"
+          aria-label="Close selector"
+          onClick={() => {
+            setIsModelMenuOpen(false);
+            setIsWrapDrawerOpen(false);
+          }}
+        />
+      )}
 
       <section className="hero-copy">
         <p className="eyebrow">Premium Wrap Studio</p>
@@ -138,10 +201,28 @@ export default function CarViewer() {
             />
           </Suspense>
           <OrbitControls
+            makeDefault
+            enableRotate
             enablePan={false}
-            enableZoom={false}
-            minPolarAngle={Math.PI / 2.45}
-            maxPolarAngle={Math.PI / 2.05}
+            enableZoom
+            target={[0, 0.25, 0]}
+            enableDamping
+            dampingFactor={0.08}
+            mouseButtons={{
+              LEFT: THREE.MOUSE.ROTATE,
+              MIDDLE: THREE.MOUSE.DOLLY,
+              RIGHT: THREE.MOUSE.ROTATE,
+            }}
+            touches={{
+              ONE: THREE.TOUCH.ROTATE,
+              TWO: THREE.TOUCH.DOLLY_ROTATE,
+            }}
+            rotateSpeed={0.85}
+            minDistance={3.4}
+            maxDistance={8.2}
+            zoomSpeed={0.75}
+            minPolarAngle={0}
+            maxPolarAngle={Math.PI}
           />
         </Canvas>
       </section>
