@@ -1,0 +1,18 @@
+---
+description: Keep project structure documentation in sync with code changes
+alwaysApply: true
+---
+
+# Documentation Maintenance
+
+When changing code in this project, update `docs/PROJECT_STRUCTURE.md` in the same task if the change affects structure or behavior.
+
+Update the document when:
+
+- Files are added, removed, renamed, or repurposed.
+- Component responsibilities change.
+- Car model paths or wrap options change.
+- 3D loading, material application, or viewer controls change.
+- Page layout or styling responsibilities change.
+
+Do not leave the structure document stale after implementation changes.
