@@ -78,7 +78,6 @@ Main showroom component.
 - If that fails, applies material to all meshes.
 - Creates high-quality solid wrap materials with `MeshPhysicalMaterial`.
 - Creates gradient wraps with a simple normal-based `ShaderMaterial`.
-- Creates laser/chrome-style wraps with a banded `ShaderMaterial` for iridescent color-shift effects.
 - Exports `PlaceholderCar` for preview mode when real GLB files are absent.
 
 ### `src/components/LoadingFallback.jsx`
@@ -90,7 +89,7 @@ Small loading indicator rendered inside the 3D canvas while a GLB is loading.
 Static showroom configuration.
 
 - `carModels`: model id, display name, description, and GLB path.
-- `wrapColors`: wrap id, label, swatch color, material tuning values, and special material flags such as `gradient` or `laser`.
+- `wrapColors`: wrap id, label, swatch color, material tuning values, and special material flags such as `gradient`.
 
 The default configured model imports `src/components/models/tesla_2018_model_3.glb` as a Vite asset URL. Update this file when adding new car models or wrap options.
 
@@ -100,35 +99,29 @@ Global CSS and showroom styling.
 
 - White showroom background.
 - Top centered model dropdown.
-- Left pull-out wrap drawer with a scrollable color/material grid.
+- Left pull-out semi-transparent wrap drawer with a scrollable color/material grid.
 - Fixed-size central viewer.
 - Bottom detail cards.
 - Responsive layout for smaller screens.
-- On phone widths, the model dropdown becomes full-width at the top, the wrap drawer remains touch-friendly from the left edge, the viewer is centered in the available middle area, and detail cards become compact.
+- On phone widths, the model dropdown becomes full-width at the top, the wrap drawer stays in a centered-left position (desktop-like interaction), the viewer occupies more vertical space, and bottom detail cards are reflowed to avoid large empty areas.
 
 ### `public/models/`
 
 Place user-provided GLB files here.
 
-Current bundled model:
+Current bundled models:
 
 ```txt
 src/components/models/tesla_2018_model_3.glb
+src/components/models/2024_byd_seal.glb
+src/components/models/2025_bmw_m4_competition.glb
+src/components/models/audi_rs5.glb
 ```
 
-Optional public model files can also be placed here:
+Optional public model files can also be placed here for future expansion:
 
 ```txt
-public/models/car.glb
-```
-
-Additional configured paths:
-
-```txt
-public/models/byd-seal.glb
-public/models/volvo-ex30.glb
-public/models/porsche-911.glb
-public/models/range-rover.glb
+public/models/*.glb
 ```
 
 If a configured file does not exist, the app uses the placeholder 3D car instead of crashing.
