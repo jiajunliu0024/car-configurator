@@ -30,6 +30,7 @@ const carModels = [
   },
 ];
 
+// to-do: update the wrap colors
 const wrapColors = [
   {
     id: "emerald",

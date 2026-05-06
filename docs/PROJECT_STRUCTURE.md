@@ -71,7 +71,8 @@ Main showroom component.
 
 - Loads GLB files using `useGLTF`.
 - Clones the loaded scene before applying materials.
-- Finds car body meshes by paint material names first, especially `primary`, `primary.001`, `primary.002`, and other `primary.*` materials used by the Tesla GLB.
+- Finds car body meshes by paint material names first, especially `primary.*` (Tesla) and `m4car_body1` / `m4car_hood1` / `m4car_bodykit1` style names (BMW M4).
+- Includes door meshes with `plast`-tagged materials as paint candidates when the mesh name indicates a door, to handle mislabeled exports where painted door skin is not tagged as body paint.
 - Also matches mesh/material names such as `body`, `paint`, `carpaint`, `bodywork`, `shell`, `door`, `hood`, `bumper`, `roof`, or similar panel names.
 - Skips non-wrap parts such as wheels, tires, glass, lights, interior, grille, chrome, badges, and plates using token-based matching so names like `primary` are not accidentally excluded by the `rim` token.
 - If no named body mesh exists, applies material to all wrap candidates so split body panels change together.

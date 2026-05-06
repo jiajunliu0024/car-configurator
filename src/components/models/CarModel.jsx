@@ -2,6 +2,7 @@ import { useGLTF } from "@react-three/drei";
 import { useMemo } from "react";
 import * as THREE from "three";
 
+// Heuristic tokens for body parts that are likely paintable.
 const BODY_NAME_MATCH = [
   "primary",
   "body",
@@ -23,8 +24,19 @@ const BODY_NAME_MATCH = [
   "spoiler",
 ];
 
-const PAINT_MATERIAL_MATCH = ["primary", "carpaint", "paint", "body"];
+// Preferred paint material naming patterns across models.
+const PAINT_MATERIAL_MATCH = [
+  "primary",
+  "carpaint",
+  "paint",
+  "body",
+  "car_body",
+  "bodykit",
+  "hood",
+  "spoiler",
+];
 
+// Parts that should never receive wrap paint.
 const NON_WRAP_MATCH = [
   "wheel",
   "tire",
@@ -55,6 +67,7 @@ const NON_WRAP_MATCH = [
   "plate",
 ];
 
+// Token-based matcher to avoid false positives from raw substring matching.
 function hasNameToken(text, term) {
   const tokens = text
     .toLowerCase()
@@ -65,10 +78,41 @@ function hasNameToken(text, term) {
     (token) =>
       token === term ||
       token === `${term}s` ||
+      new RegExp(`^${term}[0-9]+$`).test(token) ||
       (term.length > 4 && token.startsWith(term)),
   );
 }
 
+// Decide if a material should be treated as paint for wrap replacement.
+function isPaintMaterialName(materialName, meshSearchText = "") {
+  const normalized = materialName.toLowerCase();
+  const isDoorMesh = hasNameToken(meshSearchText, "door");
+
+  // Some exports mark door paint with "plast", so keep that as a controlled exception.
+  if (isDoorMesh && normalized.includes("plast")) {
+    return true;
+  }
+
+  if (
+    normalized.includes("glass") ||
+    normalized.includes("plast") ||
+    normalized.includes("interior") ||
+    normalized.includes("grill") ||
+    normalized.includes("emissive")
+  ) {
+    return false;
+  }
+
+  return PAINT_MATERIAL_MATCH.some(
+    (term) =>
+      normalized === term ||
+      normalized.startsWith(`${term}.`) ||
+      normalized.startsWith(`${term}_`) ||
+      normalized.startsWith(term),
+  );
+}
+
+// Build runtime material from selected wrap configuration.
 function createWrapMaterial(wrap) {
   if (wrap?.gradient) {
     const [startColor = "#7c3aed", endColor = "#06b6d4"] = wrap.colors || [];
@@ -107,7 +151,9 @@ function createWrapMaterial(wrap) {
   });
 }
 
+// Pick the mesh set that should receive wrap paint.
 function findBodyMeshes(meshes) {
+  // Collect mesh + material names into one searchable string.
   const getMeshSearchText = (mesh) => {
     const materialNames = Array.isArray(mesh.material)
       ? mesh.material.map((material) => material?.name || "")
@@ -121,6 +167,7 @@ function findBodyMeshes(meshes) {
       ? mesh.material.map((material) => material?.name || "")
       : [mesh.material?.name || ""];
 
+  // Exclude known non-paint parts (glass, wheels, lights, interior, etc.).
   const isNonWrapMesh = (mesh) => {
     const searchable = getMeshSearchText(mesh);
 
@@ -129,25 +176,26 @@ function findBodyMeshes(meshes) {
 
   const wrapCandidates = meshes.filter((mesh) => !isNonWrapMesh(mesh));
 
+  // First priority: explicit paint-like material names.
   const paintMaterialMeshes = wrapCandidates.filter((mesh) =>
     getMaterialNames(mesh).some((name) => {
-      const materialName = name.toLowerCase();
-      return PAINT_MATERIAL_MATCH.some(
-        (term) => materialName === term || materialName.startsWith(`${term}.`),
-      );
+      return isPaintMaterialName(name, getMeshSearchText(mesh));
     }),
   );
 
   if (paintMaterialMeshes.length > 0) return paintMaterialMeshes;
 
+  // Fallback: mesh/material names that look like body panels.
   const namedBodies = wrapCandidates.filter((mesh) =>
     BODY_NAME_MATCH.some((term) => hasNameToken(getMeshSearchText(mesh), term)),
   );
 
   if (namedBodies.length > 0) return namedBodies;
 
+  // Fallback: all wrap candidates if body naming is inconsistent.
   if (wrapCandidates.length > 0) return wrapCandidates;
 
+  // Last resort: largest mesh only.
   const largestMesh = meshes.reduce((largest, mesh) => {
     mesh.geometry.computeBoundingBox();
     const size = new THREE.Vector3();
@@ -159,6 +207,7 @@ function findBodyMeshes(meshes) {
   return largestMesh ? [largestMesh] : meshes;
 }
 
+// Clone scene, apply wrap material to selected targets, and auto-fit transform.
 function prepareScene(scene, wrapMaterial) {
   const clone = scene.clone(true);
   const meshes = [];
