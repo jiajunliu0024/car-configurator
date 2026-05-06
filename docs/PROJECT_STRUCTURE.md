@@ -102,6 +102,7 @@ Global CSS and showroom styling.
 - Fixed-size central viewer.
 - Bottom detail cards.
 - Responsive layout for smaller screens.
+- On phone widths, model tabs become a compact horizontal top scroller, wrap colors move into a bottom touch-friendly swatch rail, the viewer is centered in the available middle area, and detail cards become compact.
 
 ### `public/models/`
 
