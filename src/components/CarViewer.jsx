@@ -13,7 +13,6 @@ export default function CarViewer() {
   );
   const [availableModels, setAvailableModels] = useState({});
   const [isModelMenuOpen, setIsModelMenuOpen] = useState(false);
-  const [isWrapDrawerOpen, setIsWrapDrawerOpen] = useState(false);
 
   const selectedModel = useMemo(
     () => carModels.find((model) => model.id === selectedModelId) || carModels[0],
@@ -61,7 +60,6 @@ export default function CarViewer() {
       ...current,
       [selectedModelId]: wrapId,
     }));
-    setIsWrapDrawerOpen(false);
   };
 
   const selectModel = (modelId) => {
@@ -100,60 +98,13 @@ export default function CarViewer() {
         </div>
       </nav>
 
-      <aside
-        className={`wrap-drawer ${isWrapDrawerOpen ? "open" : ""}`}
-        aria-label="Choose wrap color"
-      >
-        <button
-          type="button"
-          className="wrap-trigger"
-          onClick={() => setIsWrapDrawerOpen((isOpen) => !isOpen)}
-          aria-expanded={isWrapDrawerOpen}
-        >
-          <span
-            style={{
-              background: selectedWrap.color,
-            }}
-          />
-          <b>{isWrapDrawerOpen ? "Close" : "Wraps"}</b>
-        </button>
-
-        <div className="wrap-panel">
-          <div className="wrap-panel-header">
-            <span>Wrap Color</span>
-            <strong>{selectedWrap.label}</strong>
-          </div>
-
-          <div className="wrap-options">
-            {wrapColors.map((wrap) => (
-              <button
-                key={wrap.id}
-                type="button"
-                aria-label={wrap.label}
-                title={wrap.label}
-                onClick={() => selectWrap(wrap.id)}
-                className={wrap.id === selectedWrap.id ? "active" : ""}
-              >
-                <span
-                  style={{
-                    background: wrap.color,
-                  }}
-                />
-                <small>{wrap.label}</small>
-              </button>
-            ))}
-          </div>
-        </div>
-      </aside>
-
-      {(isModelMenuOpen || isWrapDrawerOpen) && (
+      {isModelMenuOpen && (
         <button
           type="button"
           className="menu-scrim"
           aria-label="Close selector"
           onClick={() => {
             setIsModelMenuOpen(false);
-            setIsWrapDrawerOpen(false);
           }}
         />
       )}
@@ -240,6 +191,26 @@ export default function CarViewer() {
           <span>Payment Method</span>
           <strong>Display Only</strong>
         </article>
+      </section>
+
+      <section className="wrap-strip" aria-label="Choose wrap color">
+        {wrapColors.map((wrap) => (
+          <button
+            key={wrap.id}
+            type="button"
+            aria-label={wrap.label}
+            title={wrap.label}
+            onClick={() => selectWrap(wrap.id)}
+            className={wrap.id === selectedWrap.id ? "active" : ""}
+          >
+            <span
+              style={{
+                background: wrap.color,
+              }}
+            />
+            <small>{wrap.label}</small>
+          </button>
+        ))}
       </section>
     </main>
   );

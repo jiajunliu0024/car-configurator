@@ -1,6 +1,6 @@
 # Project Structure
 
-This project is a React + Vite 3D car wrap showroom. The page presents a white showroom-style interface with a fixed 3D car viewer, top model dropdown, and left-side wrap color drawer.
+This project is a React + Vite 3D car wrap showroom. The page presents a white showroom-style interface with a fixed 3D car viewer, top model dropdown, and bottom horizontal wrap color scroller.
 
 ## High-Level Flow
 
@@ -54,7 +54,7 @@ Small app shell. It renders only `CarViewer`, keeping page-level logic out of th
 Main showroom component.
 
 - Renders the top car model dropdown so more vehicle models can be added without crowding the header.
-- Renders the left pull-out wrap drawer so more colors/materials can be added without crowding the viewport.
+- Renders a bottom horizontal wrap color strip so users can swipe/scroll through many colors.
 - Tracks the currently selected car model.
 - Tracks wrap color per car model so each model can keep its own selected wrap.
 - Checks whether the selected GLB file exists.
@@ -71,12 +71,8 @@ Main showroom component.
 
 - Loads GLB files using `useGLTF`.
 - Clones the loaded scene before applying materials.
-- Finds car body meshes by paint material names first, especially `primary.*` (Tesla) and `m4car_body1` / `m4car_hood1` / `m4car_bodykit1` style names (BMW M4).
-- Includes door meshes with `plast`-tagged materials as paint candidates when the mesh name indicates a door, to handle mislabeled exports where painted door skin is not tagged as body paint.
-- Also matches mesh/material names such as `body`, `paint`, `carpaint`, `bodywork`, `shell`, `door`, `hood`, `bumper`, `roof`, or similar panel names.
-- Skips non-wrap parts such as wheels, tires, glass, lights, interior, grille, chrome, badges, and plates using token-based matching so names like `primary` are not accidentally excluded by the `rim` token.
-- If no named body mesh exists, applies material to all wrap candidates so split body panels change together.
-- If that fails, applies material to all meshes.
+- Uses a strict paint selection rule: only mesh/material names ending with `paint` are treated as paintable targets.
+- No heuristic fallback is applied; if a mesh/material does not match the `*paint` naming contract, it is not recolored.
 - Creates high-quality solid wrap materials with `MeshPhysicalMaterial`.
 - Creates gradient wraps with a simple normal-based `ShaderMaterial`.
 - Exports `PlaceholderCar` for preview mode when real GLB files are absent.
@@ -100,11 +96,11 @@ Global CSS and showroom styling.
 
 - White showroom background.
 - Top centered model dropdown.
-- Left pull-out semi-transparent wrap drawer with a scrollable color/material grid.
+- Bottom semi-transparent wrap strip with horizontal scrolling for many color options.
 - Fixed-size central viewer.
 - Bottom detail cards.
 - Responsive layout for smaller screens.
-- On phone widths, the model dropdown becomes full-width at the top, the wrap drawer stays in a centered-left position (desktop-like interaction), the viewer occupies more vertical space, and bottom detail cards are reflowed to avoid large empty areas.
+- On phone widths, the model dropdown becomes full-width at the top, the viewer occupies more vertical space, detail cards are compact, and the bottom wrap strip remains swipeable.
 
 ### `public/models/`
 

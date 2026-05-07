@@ -2,72 +2,7 @@ import { useGLTF } from "@react-three/drei";
 import { useMemo } from "react";
 import * as THREE from "three";
 
-// Heuristic tokens for body parts that are likely paintable.
-const BODY_NAME_MATCH = [
-  "primary",
-  "body",
-  "paint",
-  "carpaint",
-  "bodywork",
-  "shell",
-  "bumper",
-  "door",
-  "hood",
-  "bonnet",
-  "trunk",
-  "boot",
-  "fender",
-  "quarter",
-  "panel",
-  "roof",
-  "mirror",
-  "spoiler",
-];
-
-// Preferred paint material naming patterns across models.
-const PAINT_MATERIAL_MATCH = [
-  "primary",
-  "carpaint",
-  "paint",
-  "body",
-  "car_body",
-  "bodykit",
-  "hood",
-  "spoiler",
-];
-
-// Parts that should never receive wrap paint.
-const NON_WRAP_MATCH = [
-  "wheel",
-  "tire",
-  "tyre",
-  "rim",
-  "brake",
-  "disc",
-  "caliper",
-  "glass",
-  "window",
-  "windshield",
-  "windscreen",
-  "light",
-  "lamp",
-  "headlight",
-  "taillight",
-  "indicator",
-  "interior",
-  "seat",
-  "steering",
-  "dashboard",
-  "grill",
-  "grille",
-  "chrome",
-  "emblem",
-  "badge",
-  "license",
-  "plate",
-];
-
-// Token-based matcher to avoid false positives from raw substring matching.
+// Token-based matcher for name/material parsing.
 function hasNameToken(text, term) {
   const tokens = text
     .toLowerCase()
@@ -83,33 +18,14 @@ function hasNameToken(text, term) {
   );
 }
 
-// Decide if a material should be treated as paint for wrap replacement.
-function isPaintMaterialName(materialName, meshSearchText = "") {
-  const normalized = materialName.toLowerCase();
-  const isDoorMesh = hasNameToken(meshSearchText, "door");
+// The only paint rule: names/materials must end with "paint".
+function endsWithPaintToken(text) {
+  const tokens = text
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean);
 
-  // Some exports mark door paint with "plast", so keep that as a controlled exception.
-  if (isDoorMesh && normalized.includes("plast")) {
-    return true;
-  }
-
-  if (
-    normalized.includes("glass") ||
-    normalized.includes("plast") ||
-    normalized.includes("interior") ||
-    normalized.includes("grill") ||
-    normalized.includes("emissive")
-  ) {
-    return false;
-  }
-
-  return PAINT_MATERIAL_MATCH.some(
-    (term) =>
-      normalized === term ||
-      normalized.startsWith(`${term}.`) ||
-      normalized.startsWith(`${term}_`) ||
-      normalized.startsWith(term),
-  );
+  return tokens.some((token) => token.endsWith("paint"));
 }
 
 // Build runtime material from selected wrap configuration.
@@ -151,9 +67,8 @@ function createWrapMaterial(wrap) {
   });
 }
 
-// Pick the mesh set that should receive wrap paint.
+// Pick meshes to wrap: only names/materials ending with "paint".
 function findBodyMeshes(meshes) {
-  // Collect mesh + material names into one searchable string.
   const getMeshSearchText = (mesh) => {
     const materialNames = Array.isArray(mesh.material)
       ? mesh.material.map((material) => material?.name || "")
@@ -167,44 +82,12 @@ function findBodyMeshes(meshes) {
       ? mesh.material.map((material) => material?.name || "")
       : [mesh.material?.name || ""];
 
-  // Exclude known non-paint parts (glass, wheels, lights, interior, etc.).
-  const isNonWrapMesh = (mesh) => {
-    const searchable = getMeshSearchText(mesh);
+  return meshes.filter((mesh) => {
+    const meshSearchText = getMeshSearchText(mesh);
 
-    return NON_WRAP_MATCH.some((term) => hasNameToken(searchable, term));
-  };
-
-  const wrapCandidates = meshes.filter((mesh) => !isNonWrapMesh(mesh));
-
-  // First priority: explicit paint-like material names.
-  const paintMaterialMeshes = wrapCandidates.filter((mesh) =>
-    getMaterialNames(mesh).some((name) => {
-      return isPaintMaterialName(name, getMeshSearchText(mesh));
-    }),
-  );
-
-  if (paintMaterialMeshes.length > 0) return paintMaterialMeshes;
-
-  // Fallback: mesh/material names that look like body panels.
-  const namedBodies = wrapCandidates.filter((mesh) =>
-    BODY_NAME_MATCH.some((term) => hasNameToken(getMeshSearchText(mesh), term)),
-  );
-
-  if (namedBodies.length > 0) return namedBodies;
-
-  // Fallback: all wrap candidates if body naming is inconsistent.
-  if (wrapCandidates.length > 0) return wrapCandidates;
-
-  // Last resort: largest mesh only.
-  const largestMesh = meshes.reduce((largest, mesh) => {
-    mesh.geometry.computeBoundingBox();
-    const size = new THREE.Vector3();
-    mesh.geometry.boundingBox?.getSize(size);
-    const volume = size.x * size.y * size.z;
-    return volume > largest.volume ? { mesh, volume } : largest;
-  }, { mesh: null, volume: 0 }).mesh;
-
-  return largestMesh ? [largestMesh] : meshes;
+    if (endsWithPaintToken(meshSearchText)) return true;
+    return getMaterialNames(mesh).some((name) => endsWithPaintToken(name));
+  });
 }
 
 // Clone scene, apply wrap material to selected targets, and auto-fit transform.
@@ -219,8 +102,7 @@ function prepareScene(scene, wrapMaterial) {
     meshes.push(child);
   });
 
-  const bodyMeshes = findBodyMeshes(meshes);
-  const targets = bodyMeshes.length > 0 ? bodyMeshes : meshes;
+  const targets = findBodyMeshes(meshes);
 
   targets.forEach((mesh) => {
     mesh.material = wrapMaterial;
