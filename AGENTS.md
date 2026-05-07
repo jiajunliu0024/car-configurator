@@ -35,7 +35,7 @@ public/
     studio.hdr
 ```
 
-`src/App.jsx` should become the page shell. `src/components/CarViewer.jsx` should own the canvas, controls, selected model, selected material, and UI buttons. `src/components/models/CarModel.jsx` should load the selected GLB and apply the selected material. Reuse `src/assets/data.jsx` for car labels/model metadata if useful.
+`src/App.jsx` should become the page shell. `src/components/CarViewer.jsx` should own the canvas, controls, selected model, selected material, and UI buttons. `src/components/CarModel.jsx` should load the selected GLB and apply the selected material. Reuse `src/assets/data.jsx` for car labels/model metadata if useful.
 
 If `studio.hdr` is missing, use high-quality basic lights and keep the app working. Do not block the MVP on the HDR file.
 
@@ -156,7 +156,7 @@ Keep the interface clean, premium, and custom. No heavy UI libraries.
 
 - Let React Three Fiber `<Canvas>` own the renderer lifecycle.
 - Keep all canvas code inside `CarViewer.jsx`.
-- Keep model-loading code inside `components/models/CarModel.jsx`.
+- Keep model-loading code inside `components/CarModel.jsx`.
 
 ## Optional Nice To Have
 

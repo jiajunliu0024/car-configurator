@@ -4,7 +4,7 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import * as THREE from "three";
 import { carModels, wrapColors } from "../assets/data";
 import LoadingFallback from "./LoadingFallback";
-import CarModel, { PlaceholderCar } from "./models/CarModel";
+import CarModel, { PlaceholderCar } from "./CarModel";
 
 export default function CarViewer() {
   const [selectedModelId, setSelectedModelId] = useState(carModels[0].id);
@@ -139,7 +139,11 @@ export default function CarViewer() {
             {modelStatus === undefined ? (
               <LoadingFallback />
             ) : hasModelFile ? (
-              <CarModel modelPath={selectedModel.path} wrap={selectedWrap} />
+              <CarModel
+                modelPath={selectedModel.path}
+                wrap={selectedWrap}
+                modelId={selectedModel.id}
+              />
             ) : (
               <PlaceholderCar wrap={selectedWrap} />
             )}
@@ -176,21 +180,6 @@ export default function CarViewer() {
             maxPolarAngle={Math.PI}
           />
         </Canvas>
-      </section>
-
-      <section className="detail-cards" aria-label="Showroom details">
-        <article>
-          <span>Selected Wrap</span>
-          <strong>{selectedWrap.label}</strong>
-        </article>
-        <article>
-          <span>Model Source</span>
-          <strong>{hasModelFile ? "GLB Loaded" : "Preview Mode"}</strong>
-        </article>
-        <article>
-          <span>Payment Method</span>
-          <strong>Display Only</strong>
-        </article>
       </section>
 
       <section className="wrap-strip" aria-label="Choose wrap color">

@@ -67,8 +67,27 @@ function createWrapMaterial(wrap) {
   });
 }
 
-// Pick meshes to wrap: only names/materials ending with "paint".
-function findBodyMeshes(meshes) {
+const MODEL_PAINT_RULES = {
+  "tesla-model-3": {
+    includes: ["primary"],
+  },
+  "bmw-m4-competition": {
+    includes: ["m4car_body1", "m4car_bodykit1", "m4car_hood1"],
+  },
+  "audi-rs5": {
+    includes: ["car_paint", "bodypaint"],
+  },
+  "byd-seal": {
+    includes: ["body_paint", "body_paint_0"],
+  },
+};
+// to-do: update the ground offset
+const MODEL_GROUND_OFFSET = {
+  "tesla-model-3": -2.8,
+};
+
+// Pick meshes to wrap: prefer strict *paint naming, fallback to per-model rules.
+function findBodyMeshes(meshes, modelId) {
   const getMeshSearchText = (mesh) => {
     const materialNames = Array.isArray(mesh.material)
       ? mesh.material.map((material) => material?.name || "")
@@ -82,16 +101,21 @@ function findBodyMeshes(meshes) {
       ? mesh.material.map((material) => material?.name || "")
       : [mesh.material?.name || ""];
 
+  const fallbackRules = MODEL_PAINT_RULES[modelId]?.includes || [];
+
   return meshes.filter((mesh) => {
     const meshSearchText = getMeshSearchText(mesh);
 
     if (endsWithPaintToken(meshSearchText)) return true;
-    return getMaterialNames(mesh).some((name) => endsWithPaintToken(name));
+    if (getMaterialNames(mesh).some((name) => endsWithPaintToken(name))) return true;
+
+    if (!fallbackRules.length) return false;
+    return fallbackRules.some((rule) => meshSearchText.includes(rule));
   });
 }
 
 // Clone scene, apply wrap material to selected targets, and auto-fit transform.
-function prepareScene(scene, wrapMaterial) {
+function prepareScene(scene, wrapMaterial, modelId) {
   const clone = scene.clone(true);
   const meshes = [];
 
@@ -102,7 +126,7 @@ function prepareScene(scene, wrapMaterial) {
     meshes.push(child);
   });
 
-  const targets = findBodyMeshes(meshes);
+  const targets = findBodyMeshes(meshes, modelId);
 
   targets.forEach((mesh) => {
     mesh.material = wrapMaterial;
@@ -116,17 +140,19 @@ function prepareScene(scene, wrapMaterial) {
 
   const maxDimension = Math.max(size.x, size.y, size.z) || 1;
   const scale = 4.2 / maxDimension;
-  const position = [-center.x * scale, -box.min.y * scale - 0.5, -center.z * scale];
+  // Keep model bottom aligned with the showroom ground/shadow plane.
+  const groundY = MODEL_GROUND_OFFSET[modelId] ?? -1.12;
+  const position = [-center.x * scale, -box.min.y * scale + groundY, -center.z * scale];
 
   return { clone, position, scale };
 }
 
-export default function CarModel({ modelPath, wrap }) {
+export default function CarModel({ modelPath, wrap, modelId }) {
   const { scene } = useGLTF(modelPath);
   const wrapMaterial = useMemo(() => createWrapMaterial(wrap), [wrap]);
   const prepared = useMemo(
-    () => prepareScene(scene, wrapMaterial),
-    [scene, wrapMaterial],
+    () => prepareScene(scene, wrapMaterial, modelId),
+    [scene, wrapMaterial, modelId],
   );
 
   return (
