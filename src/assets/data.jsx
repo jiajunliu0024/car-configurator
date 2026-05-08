@@ -6,6 +6,12 @@ import porsche911Url from "../components/models/porsche_911.glb?url";
 
 const carModels = [
   {
+    id: "porsche-911",
+    name: "Porsche 911",
+    desc: "Iconic Sports Car",
+    path: porsche911Url,
+  },
+  {
     id: "tesla-model-3",
     name: "Tesla Model 3",
     desc: "Electric Performance Sedan",
@@ -29,16 +35,20 @@ const carModels = [
     desc: "Grand Touring Performance Coupe",
     path: audiRs5Url,
   },
-  {
-    id: "porsche-911",
-    name: "Porsche 911",
-    desc: "Iconic Sports Car",
-    path: porsche911Url,
-  },
 ];
 
 // to-do: update the wrap colors
 const wrapColors = [
+  {
+    id: "mirror-pearl-storm-gray",
+    label: "Mirror Pearl Storm Gray",
+    // Slightly deeper gray pearl mirror finish, closer to premium OEM metallic tone.
+    color: "#8e96a3",
+    metalness: 0.86,
+    roughness: 0.065,
+    clearcoat: 1.0,
+    clearcoatRoughness: 0.022,
+  },
   {
     id: "oak-green-metallic-neo",
     label: "Oak Green Metallic Neo (M6E)",
@@ -78,16 +88,6 @@ const wrapColors = [
     roughness: 0.055,
     clearcoat: 1.0,
     clearcoatRoughness: 0.02,
-  },
-  {
-    id: "mirror-pearl-storm-gray",
-    label: "Mirror Pearl Storm Gray",
-    // Slightly deeper gray pearl mirror finish, closer to premium OEM metallic tone.
-    color: "#8e96a3",
-    metalness: 0.86,
-    roughness: 0.065,
-    clearcoat: 1.0,
-    clearcoatRoughness: 0.022,
   },
   {
     id: "emerald",

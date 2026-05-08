@@ -14,7 +14,7 @@ export default function CarViewer() {
   );
   const [availableModels, setAvailableModels] = useState({});
   const [isModelMenuOpen, setIsModelMenuOpen] = useState(false);
-  const [lightPreset, setLightPreset] = useState("showroom");
+  const [lightPreset, setLightPreset] = useState("daylight");
 
   const selectedModel = useMemo(
     () => carModels.find((model) => model.id === selectedModelId) || carModels[0],
@@ -125,9 +125,11 @@ export default function CarViewer() {
           value={lightPreset}
           onChange={(event) => setLightPreset(event.target.value)}
         >
+          <option value="daylight">Natural Daylight</option>
           <option value="showroom">Showroom</option>
           <option value="studio">Studio Softbox</option>
-          <option value="daylight">Natural Daylight</option>
+          <option value="golden-hour">Golden Hour</option>
+          <option value="overcast">Overcast Soft</option>
         </select>
       </nav>
 
@@ -147,12 +149,27 @@ export default function CarViewer() {
             alpha: true,
             outputColorSpace: THREE.SRGBColorSpace,
             toneMapping: THREE.ACESFilmicToneMapping,
-            toneMappingExposure: lightPreset === "daylight" ? 1.08 : 1.0,
+            toneMappingExposure:
+              lightPreset === "daylight"
+                ? 1.08
+                : lightPreset === "golden-hour"
+                  ? 1.04
+                  : lightPreset === "overcast"
+                    ? 0.98
+                    : 1.0,
           }}
         >
           <color
             attach="background"
-            args={[lightPreset === "daylight" ? "#eef2f7" : "#f5f3f5"]}
+            args={[
+              lightPreset === "golden-hour"
+                ? "#f6efe5"
+                : lightPreset === "overcast"
+                  ? "#e8edf2"
+                  : lightPreset === "daylight"
+                    ? "#eef2f7"
+                    : "#f5f3f5",
+            ]}
           />
 
           {lightPreset === "showroom" ? (
@@ -199,7 +216,7 @@ export default function CarViewer() {
               />
               <directionalLight intensity={0.6} position={[4, 5, 2]} />
             </>
-          ) : (
+          ) : lightPreset === "daylight" ? (
             <>
               {/* Natural daylight: stronger sun key + cooler sky fill, closer to Porsche outdoor configurator look. */}
               <ambientLight intensity={0.22} />
@@ -212,6 +229,34 @@ export default function CarViewer() {
                 shadow-bias={-0.00008}
               />
               <directionalLight intensity={0.75} position={[-4.5, 2.2, -3.4]} />
+            </>
+          ) : lightPreset === "golden-hour" ? (
+            <>
+              {/* Golden hour: warmer key/fill for sunset-like premium promo shots. */}
+              <ambientLight intensity={0.2} />
+              <hemisphereLight args={["#ffe3be", "#d7c4ab", 0.86]} />
+              <directionalLight
+                castShadow
+                intensity={2.5}
+                position={[5.2, 5.4, 6.8]}
+                shadow-mapSize={[2048, 2048]}
+                shadow-bias={-0.00008}
+              />
+              <directionalLight intensity={0.68} position={[-3.8, 2.1, -2.6]} color={"#ffe8c7"} />
+            </>
+          ) : (
+            <>
+              {/* Overcast: diffused highlights and softer contrast for paint inspection. */}
+              <ambientLight intensity={0.35} />
+              <hemisphereLight args={["#f3f7fc", "#d8dce1", 1.2]} />
+              <directionalLight
+                castShadow
+                intensity={1.3}
+                position={[1.2, 7.8, 2.4]}
+                shadow-mapSize={[1024, 1024]}
+                shadow-bias={-0.00006}
+              />
+              <directionalLight intensity={0.42} position={[-3.4, 2.1, -2.4]} color={"#f8fbff"} />
             </>
           )}
 
@@ -242,6 +287,36 @@ export default function CarViewer() {
                   rotation={[0, 0.9, 0]}
                   scale={[2.2, 2.2, 1]}
                   color="#fff2d8"
+                />
+              </Environment>
+            ) : lightPreset === "golden-hour" ? (
+              <Environment preset="sunset" environmentIntensity={1.15}>
+                <Lightformer
+                  form="rect"
+                  intensity={1.9}
+                  position={[0, 5.5, -7]}
+                  rotation={[0, 0, 0]}
+                  scale={[16, 7, 1]}
+                  color="#ffe4bd"
+                />
+                <Lightformer
+                  form="circle"
+                  intensity={1.2}
+                  position={[-5.8, 3.8, 3.2]}
+                  rotation={[0, 1.0, 0]}
+                  scale={[2.6, 2.6, 1]}
+                  color="#ffd9a8"
+                />
+              </Environment>
+            ) : lightPreset === "overcast" ? (
+              <Environment preset="dawn" environmentIntensity={0.95}>
+                <Lightformer
+                  form="rect"
+                  intensity={1.5}
+                  position={[0, 6.5, -8]}
+                  rotation={[0, 0, 0]}
+                  scale={[20, 9, 1]}
+                  color="#edf3fb"
                 />
               </Environment>
             ) : (

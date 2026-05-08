@@ -686,6 +686,27 @@ button {
     padding: 13px 14px;
   }
 
+  .lighting-dropdown {
+    top: calc(64px + env(safe-area-inset-top));
+    right: 12px;
+    left: 12px;
+    width: auto;
+    gap: 4px;
+  }
+
+  .lighting-label {
+    font-size: 9px;
+    text-align: left;
+  }
+
+  .lighting-select {
+    width: 100%;
+    min-width: 0;
+    border-radius: 999px;
+    padding: 9px 12px;
+    font-size: 12px;
+  }
+
   .wrap-drawer {
     top: calc(220px + env(safe-area-inset-top));
     bottom: auto;
@@ -891,7 +912,11 @@ button {
 
 @media (max-width: 420px) {
   .hero-copy {
-    padding-top: calc(68px + env(safe-area-inset-top));
+    padding-top: calc(100px + env(safe-area-inset-top));
+  }
+
+  .lighting-dropdown {
+    top: calc(62px + env(safe-area-inset-top));
   }
 
   .viewer-card {
