@@ -662,9 +662,11 @@ button {
 
   .model-dropdown {
     top: max(10px, env(safe-area-inset-top));
-    right: 12px;
-    left: 12px;
-    width: auto;
+    left: 10px;
+    right: auto;
+    width: calc(62vw - 10px);
+    min-width: 170px;
+    max-width: calc(100vw - 154px);
     transform: none;
   }
 
@@ -687,16 +689,18 @@ button {
   }
 
   .lighting-dropdown {
-    top: calc(64px + env(safe-area-inset-top));
-    right: 12px;
-    left: 12px;
-    width: auto;
+    top: max(10px, env(safe-area-inset-top));
+    right: 10px;
+    left: auto;
+    width: calc(38vw - 10px);
+    min-width: 126px;
+    max-width: 142px;
     gap: 4px;
   }
 
   .lighting-label {
     font-size: 9px;
-    text-align: left;
+    text-align: right;
   }
 
   .lighting-select {
@@ -784,7 +788,7 @@ button {
 
   .hero-copy {
     max-width: none;
-    padding: calc(68px + env(safe-area-inset-top)) 18px 0;
+    padding: calc(112px + env(safe-area-inset-top)) 18px 0;
     text-align: center;
   }
 
@@ -912,11 +916,22 @@ button {
 
 @media (max-width: 420px) {
   .hero-copy {
-    padding-top: calc(100px + env(safe-area-inset-top));
+    padding-top: calc(108px + env(safe-area-inset-top));
   }
 
   .lighting-dropdown {
-    top: calc(62px + env(safe-area-inset-top));
+    top: max(8px, env(safe-area-inset-top));
+    width: calc(40vw - 8px);
+    min-width: 118px;
+    max-width: 132px;
+  }
+
+  .model-dropdown {
+    top: max(8px, env(safe-area-inset-top));
+    left: 8px;
+    width: calc(60vw - 8px);
+    min-width: 160px;
+    max-width: calc(100vw - 144px);
   }
 
   .viewer-card {
