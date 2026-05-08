@@ -2,6 +2,7 @@ import teslaModel3Url from "../components/models/tesla_2018_model_3.glb?url";
 import bmwM4Url from "../components/models/2025_bmw_m4_competition.glb?url";
 import audiRs5Url from "../components/models/audi_rs5.glb?url";
 import bydSealUrl from "../components/models/2024_byd_seal.glb?url";
+import porsche911Url from "../components/models/porsche_911.glb?url";
 
 const carModels = [
   {
@@ -28,10 +29,66 @@ const carModels = [
     desc: "Grand Touring Performance Coupe",
     path: audiRs5Url,
   },
+  {
+    id: "porsche-911",
+    name: "Porsche 911",
+    desc: "Iconic Sports Car",
+    path: porsche911Url,
+  },
 ];
 
 // to-do: update the wrap colors
 const wrapColors = [
+  {
+    id: "oak-green-metallic-neo",
+    label: "Oak Green Metallic Neo (M6E)",
+    // Porsche-inspired tone from public color references: deeper/saturated oak green, glossy metallic.
+    color: "#1f372c",
+    metalness: 0.82,
+    roughness: 0.14,
+    clearcoat: 1.0,
+    clearcoatRoughness: 0.04,
+  },
+  {
+    id: "vanadium-grey-metallic",
+    label: "Vanadium Grey Metallic",
+    // Tuned to match the reference: cool deep gray + crisp clearcoat highlight.
+    color: "#4a515a",
+    metalness: 0.76,
+    roughness: 0.22,
+    clearcoat: 1.0,
+    clearcoatRoughness: 0.06,
+  },
+  {
+    id: "mirror-gloss-obsidian",
+    label: "Mirror Gloss Obsidian",
+    // Mirror-like deep gloss: very low roughness + sharp clearcoat layer.
+    color: "#0c1018",
+    metalness: 0.88,
+    roughness: 0.04,
+    clearcoat: 1.0,
+    clearcoatRoughness: 0.015,
+  },
+  {
+    id: "mirror-pearl-gray",
+    label: "Mirror Pearl Gray",
+    // Bright mirror gray with subtle pearl-like sheen under daylight.
+    color: "#aab0bb",
+    metalness: 0.9,
+    roughness: 0.055,
+    clearcoat: 1.0,
+    clearcoatRoughness: 0.02,
+  },
+  {
+    id: "mirror-pearl-storm-gray",
+    label: "Mirror Pearl Storm Gray",
+    // Slightly deeper gray pearl mirror finish, closer to premium OEM metallic tone.
+    color: "#8e96a3",
+    metalness: 0.86,
+    roughness: 0.065,
+    clearcoat: 1.0,
+    clearcoatRoughness: 0.022,
+  },
   {
     id: "emerald",
     label: "Emerald",

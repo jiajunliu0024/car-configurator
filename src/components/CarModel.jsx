@@ -62,8 +62,8 @@ function createWrapMaterial(wrap) {
     color: wrap?.color || "#00b98f",
     metalness: wrap?.metalness ?? 0.45,
     roughness: wrap?.roughness ?? 0.24,
-    clearcoat: 0.75,
-    clearcoatRoughness: 0.16,
+    clearcoat: wrap?.clearcoat ?? 0.75,
+    clearcoatRoughness: wrap?.clearcoatRoughness ?? 0.16,
   });
 }
 

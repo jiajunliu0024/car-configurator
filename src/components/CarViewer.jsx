@@ -1,7 +1,8 @@
-import { ContactShadows, Environment, OrbitControls } from "@react-three/drei";
+import { ContactShadows, Environment, Lightformer, OrbitControls } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import * as THREE from "three";
+import { RectAreaLightUniformsLib } from "three/examples/jsm/lights/RectAreaLightUniformsLib.js";
 import { carModels, wrapColors } from "../assets/data";
 import LoadingFallback from "./LoadingFallback";
 import CarModel, { PlaceholderCar } from "./CarModel";
@@ -13,6 +14,7 @@ export default function CarViewer() {
   );
   const [availableModels, setAvailableModels] = useState({});
   const [isModelMenuOpen, setIsModelMenuOpen] = useState(false);
+  const [lightPreset, setLightPreset] = useState("showroom");
 
   const selectedModel = useMemo(
     () => carModels.find((model) => model.id === selectedModelId) || carModels[0],
@@ -54,6 +56,10 @@ export default function CarViewer() {
       cancelled = true;
     };
   }, [selectedModel.path]);
+
+  useEffect(() => {
+    RectAreaLightUniformsLib.init();
+  }, []);
 
   const selectWrap = (wrapId) => {
     setWrapByModel((current) => ({
@@ -109,6 +115,22 @@ export default function CarViewer() {
         />
       )}
 
+      <nav className="lighting-dropdown" aria-label="Choose lighting preset">
+        <label className="lighting-label" htmlFor="lightingPreset">
+          Lighting
+        </label>
+        <select
+          id="lightingPreset"
+          className="lighting-select"
+          value={lightPreset}
+          onChange={(event) => setLightPreset(event.target.value)}
+        >
+          <option value="showroom">Showroom</option>
+          <option value="studio">Studio Softbox</option>
+          <option value="daylight">Natural Daylight</option>
+        </select>
+      </nav>
+
       <section className="hero-copy">
         <p className="eyebrow">Premium Wrap Studio</p>
         <h1>{selectedModel.name}</h1>
@@ -120,20 +142,111 @@ export default function CarViewer() {
           camera={{ position: [0, 1.35, 6.4], fov: 35 }}
           dpr={[1, 2]}
           shadows
-          gl={{ antialias: true, alpha: true }}
+          gl={{
+            antialias: true,
+            alpha: true,
+            outputColorSpace: THREE.SRGBColorSpace,
+            toneMapping: THREE.ACESFilmicToneMapping,
+            toneMappingExposure: lightPreset === "daylight" ? 1.08 : 1.0,
+          }}
         >
-          <color attach="background" args={["#f5f3f5"]} />
-          <ambientLight intensity={0.65} />
-          <hemisphereLight args={["#ffffff", "#d9d4ce", 1.1]} />
-          <directionalLight
-            castShadow
-            intensity={2.2}
-            position={[3, 4, 5]}
-            shadow-mapSize={[1024, 1024]}
+          <color
+            attach="background"
+            args={[lightPreset === "daylight" ? "#eef2f7" : "#f5f3f5"]}
           />
-          <directionalLight intensity={1.1} position={[-4, 2, -3]} />
+
+          {lightPreset === "showroom" ? (
+            <>
+              <ambientLight intensity={0.65} />
+              <hemisphereLight args={["#ffffff", "#d9d4ce", 1.1]} />
+              <directionalLight
+                castShadow
+                intensity={2.2}
+                position={[3, 4, 5]}
+                shadow-mapSize={[1024, 1024]}
+              />
+              <directionalLight intensity={1.1} position={[-4, 2, -3]} />
+            </>
+          ) : lightPreset === "studio" ? (
+            <>
+              {/* Studio preset: softbox-style area lights + reduced fill to keep crisp clearcoat highlights. */}
+              <ambientLight intensity={0.25} />
+              <hemisphereLight args={["#ffffff", "#e7e2db", 0.55]} />
+
+              <rectAreaLight
+                intensity={18}
+                width={6}
+                height={2.4}
+                position={[2.8, 2.1, 3.4]}
+                rotation={[-0.45, 0.75, 0]}
+                color={"#ffffff"}
+              />
+              <rectAreaLight
+                intensity={8}
+                width={5.5}
+                height={2}
+                position={[-3.6, 1.5, 1.2]}
+                rotation={[-0.15, -0.95, 0]}
+                color={"#ffffff"}
+              />
+              <rectAreaLight
+                intensity={10}
+                width={7}
+                height={1.6}
+                position={[0.0, 2.6, -3.8]}
+                rotation={[-0.3, Math.PI, 0]}
+                color={"#f7fbff"}
+              />
+              <directionalLight intensity={0.6} position={[4, 5, 2]} />
+            </>
+          ) : (
+            <>
+              {/* Natural daylight: stronger sun key + cooler sky fill, closer to Porsche outdoor configurator look. */}
+              <ambientLight intensity={0.22} />
+              <hemisphereLight args={["#eaf3ff", "#e6d7c7", 0.95]} />
+              <directionalLight
+                castShadow
+                intensity={3.1}
+                position={[6.5, 9.5, 4.5]}
+                shadow-mapSize={[2048, 2048]}
+                shadow-bias={-0.00008}
+              />
+              <directionalLight intensity={0.75} position={[-4.5, 2.2, -3.4]} />
+            </>
+          )}
+
           <Suspense fallback={null}>
-            <Environment preset="studio" />
+            {lightPreset === "daylight" ? (
+              <Environment preset="city" environmentIntensity={1.1}>
+                {/* Lightformers add "photographic" sky/sun reflection shapes (key for natural clearcoat highlights). */}
+                <Lightformer
+                  form="rect"
+                  intensity={2.2}
+                  position={[0, 6, -8]}
+                  rotation={[0, 0, 0]}
+                  scale={[18, 8, 1]}
+                  color="#eaf3ff"
+                />
+                <Lightformer
+                  form="rect"
+                  intensity={1.6}
+                  position={[6, 3.5, 2]}
+                  rotation={[0, -0.7, 0]}
+                  scale={[6, 3, 1]}
+                  color="#ffffff"
+                />
+                <Lightformer
+                  form="circle"
+                  intensity={0.9}
+                  position={[-6, 4.5, 3]}
+                  rotation={[0, 0.9, 0]}
+                  scale={[2.2, 2.2, 1]}
+                  color="#fff2d8"
+                />
+              </Environment>
+            ) : (
+              <Environment preset="studio" />
+            )}
           </Suspense>
           <Suspense fallback={<LoadingFallback />}>
             {modelStatus === undefined ? (

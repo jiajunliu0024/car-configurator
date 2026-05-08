@@ -99,7 +99,8 @@ Small loading indicator rendered inside the 3D canvas while a GLB is loading.
 Static showroom configuration.
 
 - `carModels`: model id, display name, description, and GLB path.
-- `wrapColors`: wrap id, label, swatch color, material tuning values, and special material flags such as `gradient`.
+- `wrapColors`: wrap id, label, swatch color, material tuning values (`metalness`, `roughness`, optional `clearcoat`, optional `clearcoatRoughness`), and special material flags such as `gradient`.
+- Wrap presets include OEM-inspired finishes (for example Porsche-like metallic tones) defined purely with physical material parameters, without requiring texture maps.
 
 Current runtime imports use `src/components/models/*.glb` as Vite asset URLs.
 
