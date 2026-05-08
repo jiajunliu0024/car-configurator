@@ -126,10 +126,10 @@ export default function CarViewer() {
           onChange={(event) => setLightPreset(event.target.value)}
         >
           <option value="daylight">Natural Daylight</option>
+          <option value="overcast">Overcast Soft</option>
+          <option value="golden-hour">Golden Hour</option>
           <option value="showroom">Showroom</option>
           <option value="studio">Studio Softbox</option>
-          <option value="golden-hour">Golden Hour</option>
-          <option value="overcast">Overcast Soft</option>
         </select>
       </nav>
 
@@ -156,7 +156,9 @@ export default function CarViewer() {
                   ? 1.04
                   : lightPreset === "overcast"
                     ? 0.98
-                    : 1.0,
+                    : lightPreset === "studio"
+                      ? 0.92
+                      : 1.0,
           }}
         >
           <color
@@ -261,55 +263,81 @@ export default function CarViewer() {
           )}
 
           <Suspense fallback={null}>
-            {lightPreset === "daylight" ? (
-              <Environment preset="city" environmentIntensity={1.1}>
-                {/* Lightformers add "photographic" sky/sun reflection shapes (key for natural clearcoat highlights). */}
-                <Lightformer
-                  form="rect"
-                  intensity={2.2}
-                  position={[0, 6, -8]}
-                  rotation={[0, 0, 0]}
-                  scale={[18, 8, 1]}
-                  color="#eaf3ff"
-                />
-                <Lightformer
-                  form="rect"
-                  intensity={1.6}
-                  position={[6, 3.5, 2]}
-                  rotation={[0, -0.7, 0]}
-                  scale={[6, 3, 1]}
-                  color="#ffffff"
-                />
-                <Lightformer
-                  form="circle"
-                  intensity={0.9}
-                  position={[-6, 4.5, 3]}
-                  rotation={[0, 0.9, 0]}
-                  scale={[2.2, 2.2, 1]}
-                  color="#fff2d8"
-                />
-              </Environment>
-            ) : lightPreset === "golden-hour" ? (
-              <Environment preset="sunset" environmentIntensity={1.15}>
-                <Lightformer
-                  form="rect"
-                  intensity={1.9}
-                  position={[0, 5.5, -7]}
-                  rotation={[0, 0, 0]}
-                  scale={[16, 7, 1]}
-                  color="#ffe4bd"
-                />
-                <Lightformer
-                  form="circle"
-                  intensity={1.2}
-                  position={[-5.8, 3.8, 3.2]}
-                  rotation={[0, 1.0, 0]}
-                  scale={[2.6, 2.6, 1]}
-                  color="#ffd9a8"
-                />
-              </Environment>
-            ) : lightPreset === "overcast" ? (
-              <Environment preset="dawn" environmentIntensity={0.95}>
+            <Environment
+              preset={
+                lightPreset === "daylight"
+                  ? "city"
+                  : lightPreset === "golden-hour"
+                    ? "sunset"
+                    : lightPreset === "overcast"
+                      ? "dawn"
+                      : "studio"
+              }
+              background={false}
+              backgroundBlurriness={0}
+              environmentIntensity={
+                lightPreset === "studio"
+                  ? 0.88
+                  : lightPreset === "golden-hour"
+                    ? 1.18
+                    : lightPreset === "showroom"
+                      ? 1.02
+                      : lightPreset === "overcast"
+                        ? 0.92
+                        : lightPreset === "daylight"
+                          ? 1.15
+                          : 1.1
+              }
+            >
+              {lightPreset === "daylight" && (
+                <>
+                  <Lightformer
+                    form="rect"
+                    intensity={2.2}
+                    position={[0, 6, -8]}
+                    rotation={[0, 0, 0]}
+                    scale={[18, 8, 1]}
+                    color="#eaf3ff"
+                  />
+                  <Lightformer
+                    form="rect"
+                    intensity={1.6}
+                    position={[6, 3.5, 2]}
+                    rotation={[0, -0.7, 0]}
+                    scale={[6, 3, 1]}
+                    color="#ffffff"
+                  />
+                  <Lightformer
+                    form="circle"
+                    intensity={0.9}
+                    position={[-6, 4.5, 3]}
+                    rotation={[0, 0.9, 0]}
+                    scale={[2.2, 2.2, 1]}
+                    color="#fff2d8"
+                  />
+                </>
+              )}
+              {lightPreset === "golden-hour" && (
+                <>
+                  <Lightformer
+                    form="rect"
+                    intensity={1.9}
+                    position={[0, 5.5, -7]}
+                    rotation={[0, 0, 0]}
+                    scale={[16, 7, 1]}
+                    color="#ffe4bd"
+                  />
+                  <Lightformer
+                    form="circle"
+                    intensity={1.2}
+                    position={[-5.8, 3.8, 3.2]}
+                    rotation={[0, 1.0, 0]}
+                    scale={[2.6, 2.6, 1]}
+                    color="#ffd9a8"
+                  />
+                </>
+              )}
+              {lightPreset === "overcast" && (
                 <Lightformer
                   form="rect"
                   intensity={1.5}
@@ -318,10 +346,8 @@ export default function CarViewer() {
                   scale={[20, 9, 1]}
                   color="#edf3fb"
                 />
-              </Environment>
-            ) : (
-              <Environment preset="studio" />
-            )}
+              )}
+            </Environment>
           </Suspense>
           <Suspense fallback={<LoadingFallback />}>
             {modelStatus === undefined ? (

@@ -59,7 +59,10 @@ Small app shell. It renders only `CarViewer`, keeping page-level logic out of th
 Main showroom component.
 
 - Renders the top car model dropdown so more vehicle models can be added without crowding the header.
-- Renders a top-right lighting preset dropdown for quick look-dev switching (`Natural Daylight`, `Showroom`, `Studio Softbox`, `Golden Hour`, `Overcast Soft`).
+- Renders a top-right lighting preset dropdown for quick look-dev switching:
+  - Outdoor / mood: `Natural Daylight`, `Overcast Soft`, `Golden Hour`.
+  - Indoor: `Showroom`, `Studio Softbox`.
+- **Why the same wrap looks different across presets:** PBR paint is view- and light-dependent: specular highlights, clearcoat reflections, and Fresnel change with light direction, color temperature, and the HDR environment. Switching presets changes those cues on purpose—it is physically expected, not a bug.
 - Renders a bottom horizontal wrap color strip so users can swipe/scroll through many colors.
 - Tracks the currently selected car model.
 - Tracks wrap color per car model so each model can keep its own selected wrap.
@@ -67,7 +70,7 @@ Main showroom component.
 - Rejects HTML fallback responses so missing model paths do not crash `useGLTF`.
 - Renders the React Three Fiber `<Canvas>`.
 - Uses showroom lighting, `Environment`, `ContactShadows`, and `OrbitControls`.
-- Uses switchable lighting presets with different light rigs, environment presets, and exposure values to preview wraps under multiple real-world looks.
+- Uses switchable lighting presets with different light rigs, environment presets, and exposure values to preview wraps under multiple real-world looks (no dedicated night-only presets).
 - Uses `OrbitControls` with `makeDefault`, a fixed `target`, damping, bounded zoom distance, and explicit mouse/touch mappings for rotate + zoom.
 - Disables pan so the model stays centered, while allowing bounded zoom for closer inspection and explicit mouse/touch rotation controls. The viewer CSS uses `touch-action: none`, non-interactive overlays use `pointer-events: none`, and dropdown/drawer containers only enable pointer events on their actual controls so display layers do not steal rotation drags.
 - Shows the placeholder car when the GLB file is missing.
@@ -117,7 +120,7 @@ Global CSS and showroom styling.
 - Fixed-size central viewer.
 - Responsive layout for smaller screens.
 - On phone widths, the model dropdown becomes full-width at the top, the viewer occupies more vertical space, and the bottom wrap strip remains swipeable.
-- On phone widths, the lighting preset control moves below the model dropdown and spans the full width to avoid overlap.
+- On phone widths, the lighting control is aligned with the model control row while preserving title readability.
 
 ### `public/models/`
 
