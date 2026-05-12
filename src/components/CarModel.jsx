@@ -2,22 +2,6 @@ import { useGLTF } from "@react-three/drei";
 import { useMemo } from "react";
 import * as THREE from "three";
 
-// Token-based matcher for name/material parsing.
-function hasNameToken(text, term) {
-  const tokens = text
-    .toLowerCase()
-    .split(/[^a-z0-9]+/)
-    .filter(Boolean);
-
-  return tokens.some(
-    (token) =>
-      token === term ||
-      token === `${term}s` ||
-      new RegExp(`^${term}[0-9]+$`).test(token) ||
-      (term.length > 4 && token.startsWith(term)),
-  );
-}
-
 // The only paint rule: names/materials must end with "paint".
 function endsWithPaintToken(text) {
   const tokens = text
@@ -58,13 +42,20 @@ function createWrapMaterial(wrap) {
     });
   }
 
-  return new THREE.MeshPhysicalMaterial({
+  const material = new THREE.MeshPhysicalMaterial({
     color: wrap?.color || "#00b98f",
     metalness: wrap?.metalness ?? 0.45,
     roughness: wrap?.roughness ?? 0.24,
     clearcoat: wrap?.clearcoat ?? 0.75,
     clearcoatRoughness: wrap?.clearcoatRoughness ?? 0.16,
+    envMapIntensity: wrap?.envMapIntensity ?? 1.18,
+    sheen: wrap?.sheen ?? 0,
+    sheenColor: new THREE.Color(wrap?.sheenColor || wrap?.color || "#ffffff"),
+    ior: wrap?.ior ?? 1.5,
+    specularIntensity: wrap?.specularIntensity ?? 1.0,
   });
+
+  return material;
 }
 
 const MODEL_PAINT_RULES = {
