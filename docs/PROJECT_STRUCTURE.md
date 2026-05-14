@@ -18,6 +18,7 @@ CARS -Starter/
   AGENTS.md
   docs/
     PROJECT_STRUCTURE.md
+    screenshots/         # README screenshots (e.g. BMW M4, Porsche 911)
   scripts/
     compress-models.sh
   public/
